@@ -1,5 +1,4 @@
 var express = require('express');
-const { route } = require('../app');
 var router = express.Router();
 const indexController = require('../controllers/indexController');
 const UserModel = require('../models/UserModel');
@@ -12,14 +11,19 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+//Get all posts
 router.get('/posts', indexController.posts_get);
 
-router.post('/posts', verifyToken, indexController.posts_post);
+//Create a new post
+router.post('/posts', authorization, indexController.posts_post);
 
+//Get a specific post
 router.get('/posts/:id', indexController.posts_id_get)
 
-router.delete('/posts/:id', indexController.posts_id_delete)
+//Delete a specific post. 
+router.delete('/posts/:id', authorization, indexController.posts_id_delete)
 
+//Create a new user
 router.post('/new-user', indexController.new_user)
 
 router.post('/login', function(req, res, next) { 
@@ -41,7 +45,6 @@ router.post('/login', function(req, res, next) {
           const token = jwt.sign({userinfo}, secretkey, {expiresIn:'10m'});
           res.cookie('access_token', token, {
             httpOnly:true,
-
           })
             .status(200)
             .json({message:'Logged in successfully'})
@@ -52,7 +55,6 @@ router.post('/login', function(req, res, next) {
 })
 
 router.get('/protected-route', authorization, function(req, res, next) {
-
   if (req.isAdmin) {
     res.json({
       adminstatus:'user is admin',
@@ -60,6 +62,10 @@ router.get('/protected-route', authorization, function(req, res, next) {
         admin:req.isAdmin,
         username:req.username
       }
+    })
+  } else {
+    res.json({
+      message:'user is not admin'
     })
   }
 })
@@ -70,22 +76,7 @@ router.get('/logout', function(req, res, next) {
     .json({message:'Successfully logged out.'})
 })
 
-function verifyToken(req, res, next) {
-  //Get auth header value.
-  const bearerHeader = req.headers['authorization'];
-  //Check to see if bearer is undefined. 
-  if (typeof bearerHeader !== 'undefined') {
-    //Split at the space
-    bearer = bearerHeader.split(' ');
-    const bearerToken = bearer[1];
-    //set the token.
-    req.token = bearerToken;
-    next()
-  } else {
-    // Forbidden
-    res.sendStatus('403')
-  }
-}
+
 
 function authorization(req, res, next) {
   const token = req.cookies.access_token
@@ -101,6 +92,7 @@ function authorization(req, res, next) {
     } 
     try {
       const data = jwt.verify(token, secretkey);
+      console.log(data)
       req.username = data.userinfo.username
       req.isAdmin = data.userinfo.isAdmin
       return next()

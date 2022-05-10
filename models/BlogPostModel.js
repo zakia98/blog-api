@@ -5,8 +5,9 @@ const Schema = mongoose.Schema;
 let BlogPostSchema = new Schema({
     title:{type:String, required:true},
     author: {type:String, required:true},
-    imageURL:{type:String, required:false},
-    textContent:{type:Boolean, required:true},
+    imageURL:{type:Schema.Types.Mixed, required:false},
+    text:{type:String, required:true},
+    published:{type:Boolean, required:true},
     comments:[]
 })
 

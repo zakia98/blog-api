@@ -14,6 +14,9 @@ git push heroku main
 
 ### Environment Variables
 Users will need to provide the following environment variables to their hosting server. 
+- `SECRET_KEY`
+- `DB_URL`
+- `ADMIN_KEY`
 
 Users will need to set the `SECRET_KEY` for the JSON web token generation and verification, and `DB_URL` for the database link. The `ADMIN_KEY` is used to create new members and must match the form data variable `admin_key` when sending a post request to create a new user. 
 
